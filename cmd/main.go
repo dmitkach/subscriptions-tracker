@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load("secrets.env"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Println(".env file not found, using system env")
 	}
 

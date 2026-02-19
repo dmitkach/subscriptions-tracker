@@ -16,7 +16,7 @@ services:
     build: .
     container_name: subscriptions_app
     env_file:
-      - secrets.env
+      - .env
     depends_on:
       - db
     ports:
