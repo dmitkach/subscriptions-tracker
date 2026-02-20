@@ -85,7 +85,7 @@ func (h *Handler) GetSubscription(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(idStr)
 	if err != nil {
 		log.Println("incorrect UUID", err)
-		http.Error(w, "incorrect UUID in request", http.StatusBadRequest)
+		http.Error(w, "incorrect subscription id", http.StatusBadRequest)
 		return
 	}
 
@@ -119,8 +119,69 @@ func (h *Handler) GetSubscription(w http.ResponseWriter, r *http.Request) {
 
 	responseBytes, err := json.Marshal(sub)
 	if err != nil {
-		log.Println("Unable converting response to JSON")
+		log.Println("Unable converting response to JSON", err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(responseBytes)
+}
+
+func (h *Handler) GetUserSubscriptions(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userIDStr := vars["userID"]
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		log.Println("incorrect user uuid")
+		http.Error(w, "incorrect user id", http.StatusBadRequest)
+		return
+	}
+
+	var subs []Subscription
+
+	q := `SELECT id, service_name, price, user_id, start_date, end_date FROM subscriptions 
+                                                              WHERE user_id = $1 ORDER BY start_date `
+
+	rows, err := h.DB.Query(q, userID)
+	if err != nil {
+		log.Println("error in db query:", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		sub := Subscription{}
+		var endDate sql.NullTime
+		var startDate time.Time
+		err = rows.Scan(&sub.ID, &sub.ServiceName, &sub.Price, &sub.UserID, &startDate, &endDate)
+		if err != nil {
+			log.Println("error reading rows from db:", err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
+
+		sub.StartDate = startDate.Format("01-2006")
+		if endDate.Valid {
+			t := endDate.Time
+			str := t.Format("01-2006")
+			sub.EndDate = &str
+		}
+
+		subs = append(subs, sub)
+	}
+	if err := rows.Err(); err != nil {
+		log.Println(err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+
+	responseBytes, err := json.Marshal(subs)
+	if err != nil {
+		log.Println("Unable converting response to JSON:", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 

@@ -17,6 +17,7 @@ func RunServer(h *handlers.Handler) {
 
 	r.HandleFunc("/subscriptions", h.CreateSubscription).Methods(http.MethodPost)
 	r.HandleFunc("/subscriptions/{id}", h.GetSubscription).Methods(http.MethodGet)
+	r.HandleFunc("/users/{userID}/subscriptions", h.GetUserSubscriptions).Methods(http.MethodGet)
 
 	if err := http.ListenAndServe("0.0.0.0:8080", r); err != nil {
 		log.Fatal(err)
