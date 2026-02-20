@@ -36,9 +36,8 @@ migrations-reset/  — сброс SQL миграций
 
 ### Принципы:
 
-* Чистая архитектура (разделение handler → service → repository)
+* Понятная архитектура
 * Изоляция бизнес-логики от HTTP и базы данных
-* UUID как primary key
 * Конфигурация через `.env`
 
 ---
@@ -49,7 +48,6 @@ migrations-reset/  — сброс SQL миграций
 * **Gorilla Mux** — роутинг
 * **PostgreSQL**
 * **Docker / Docker Compose**
-* **UUID**
 * **godotenv**
 * SQL migrations
 
