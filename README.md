@@ -62,6 +62,8 @@ git clone https://github.com/dmitkach/subscriptions-tracker.git
 cd subscriptions-tracker
 ```
 
+### Создание .env файла
+
 ### Запуск через Docker
 
 ```bash
